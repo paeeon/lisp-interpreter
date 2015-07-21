@@ -1,5 +1,3 @@
-require 'pry'
-
 class Interpreter
   def is_actually_an_integer?(obj)
     Float(obj) != nil rescue false
@@ -15,18 +13,26 @@ class Interpreter
 
   def convert_to_expression(token)
     arr = []
+    last_item = nil
     token.each_with_index do |bit, index|
-      if bit == "("
+      if (last_item && index <= last_item) || (bit == ")")
+        next
+      elsif bit == "("
         last_item = find_last_item_in_depth(index, token)
-        inner_arr = []
-        binding.pry
         arr.push(convert_to_expression(token[(index+1)..last_item]))
       else
-        arr.push(bit)
-        binding.pry
+        if is_actually_an_integer?(bit)
+          arr.push(bit.to_i)
+        else
+          arr.push(bit)
+        end
       end
     end
     arr
+  end
+
+  def drop_outer_layer(array)
+    array[0]
   end
 
   def tokenize(string)
@@ -45,7 +51,7 @@ class Interpreter
         # If there isn't a quote, look at the first element and see if it 
         # has a function definition.
         token = tokenize(contents)
-        convert_to_expression(token)
+        p drop_outer_layer(convert_to_expression(token))
       end
     end
   end
