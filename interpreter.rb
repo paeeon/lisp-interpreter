@@ -1,4 +1,6 @@
 class Interpreter
+  NUM_FUNCTIONS = ["+", "*", "-", "/", "rem", "abs", "max", "min"]
+
   def is_actually_an_integer?(obj)
     Float(obj) != nil rescue false
   end
@@ -39,6 +41,26 @@ class Interpreter
     string.gsub('(', ' ( ').gsub(')', ' ) ').split()
   end
 
+  def typify(arr)
+    arr.map! do |bit|
+      temp_hash = {}
+      temp_hash["value"] = bit
+      if bit.respond_to?('each')
+        typify(bit)
+      elsif bit.is_a? Integer
+        temp_hash["type"] = "integer"
+      elsif bit.is_a? String
+        temp_hash["type"] = "string"
+      elsif NUM_FUNCTIONS.include?(bit)
+        temp_hash["type"] = "numeric functions"
+      else
+        temp_hash["type"] = "unknown"
+      end
+      temp_hash
+    end
+    arr
+  end
+
   def parse(filename)
     File.open(filename, 'r') do |file|  
       # First, it looks to see if there is a quote before the list.
@@ -51,7 +73,8 @@ class Interpreter
         # If there isn't a quote, look at the first element and see if it 
         # has a function definition.
         token = tokenize(contents)
-        p drop_outer_layer(convert_to_expression(token))
+        arrayed_token = drop_outer_layer(convert_to_expression(token))
+        p typify(arrayed_token)
       end
     end
   end
