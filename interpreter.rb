@@ -1,3 +1,5 @@
+require 'pry'
+
 class Interpreter
   NUM_FUNCTIONS = ["+", "*", "-", "/", "rem", "abs", "max", "min"]
 
@@ -47,6 +49,7 @@ class Interpreter
       temp_hash["value"] = bit
       if bit.respond_to?('each')
         typify(bit)
+        temp_hash["type"] = "array"
       elsif bit.is_a? Integer
         temp_hash["type"] = "integer"
       elsif bit.is_a? String
@@ -56,6 +59,7 @@ class Interpreter
       else
         temp_hash["type"] = "unknown"
       end
+      binding.pry
       temp_hash
     end
     arr
